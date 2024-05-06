@@ -3,31 +3,39 @@ public class Board{
     int rows, cols;
     int numBombs;
     boolean firstClick = true;
+    boolean gameOver = false;
 
     color bomb = color(255, 50, 132);
     color hidden = color(50, 132, 255);
     color revealed = color(51, 51, 70);
-    color flagged = color(128, 51, 51);
+    color flagged = color(128);
     color textCol = color(204);
 
     public Board(int rows, int cols, int numBombs){
         this.rows = rows;
         this.cols = cols;
         this.numBombs = numBombs;
+        firstClick = true;
 
         board = new Cell[rows][cols];
+        initBoard();
+    }
+
+    void initBoard(){
         for(int r = 0; r < rows; r++)
             for(int c = 0; c < cols; c++)
                 board[r][c] = new Cell();
 
         assignBombs();
         updateCellNumbers();
+        gameOver = false;
+        firstClick = true;
     }
 
     void assignBombs(){
         int[] chosenIndexes = new int[numBombs];
-        
         int count = 0;
+
         while(count < numBombs){
             int num = (int)random(rows * cols);
             boolean found = false;
@@ -79,10 +87,23 @@ public class Board{
     }
 
     public void reveal(int r, int c){
+        if(gameOver){
+            initBoard();
+            return;
+        }
+
+        if(firstClick){
+            while(board[r][c].isBomb() || board[r][c].getNum() > 0)
+                initBoard();
+        }
+        firstClick = false;
+
         board[r][c].reveal();
 
         if(!board[r][c].isBomb() && board[r][c].getNum() == 0)
             revealAdjCells(r, c);
+
+        if(board[r][c].isBomb()) gameOver = true;
     }
 
     public void flag(int r, int c){
