@@ -7,6 +7,7 @@ public class Board{
     color bomb = color(255, 50, 132);
     color hidden = color(50, 132, 255);
     color revealed = color(51, 51, 70);
+    color flagged = color(128, 51, 51);
     color textCol = color(204);
 
     public Board(int rows, int cols, int numBombs){
@@ -79,6 +80,32 @@ public class Board{
 
     public void reveal(int r, int c){
         board[r][c].reveal();
+
+        if(!board[r][c].isBomb() && board[r][c].getNum() == 0)
+            revealAdjCells(r, c);
+    }
+
+    public void flag(int r, int c){
+        if(board[r][c].isRevealed()) return;
+        board[r][c].flag();
+    }
+
+    void revealAdjCells(int r, int c){
+        if(r < 0 || r >= rows || c < 0 || c >= cols) return;
+
+        for(int sqrR = r - 1; sqrR <= r + 1; sqrR++){
+            if(sqrR < 0 || sqrR >= rows) continue;
+            for(int sqrC = c - 1; sqrC <= c + 1; sqrC++){
+                if(sqrC < 0 || sqrC >= cols) continue;
+                if(sqrR == r && sqrC == c) continue;
+                if(board[sqrR][sqrC].isRevealed()) continue;
+                
+                board[sqrR][sqrC].reveal();
+
+                if(!board[sqrR][sqrC].isBomb() && !board[r][c].isFlagged() && board[sqrR][sqrC].getNum() == 0)
+                    revealAdjCells(sqrR, sqrC);
+            }
+        }
     }
 
     public void drawBoard(){
@@ -89,11 +116,15 @@ public class Board{
 
         for(int r = 0; r < rows; r++){
             for(int c = 0; c < cols; c++){
-                if(!board[r][c].isRevealed()){  // if cell is revealed
+                if(board[r][c].isFlagged()){        // if cell is flagged
+                    fill(flagged);
+                    rect(c * wid, r * wid, wid, wid);
+                }
+                else if(!board[r][c].isRevealed()){ // if cell is hidden
                     fill(hidden);
                     rect(c * wid, r * wid, wid, wid);
                 }
-                else{                           // if cell is hidden
+                else{                               // if cell is revealed
                     if(board[r][c].isBomb()){
                         fill(bomb);
                         rect(c * wid, r * wid, wid, wid);
@@ -145,7 +176,15 @@ class Cell{
         revealed = true;
     }
 
+    public void flag(){
+        isFlagged = !isFlagged;
+    }
+
     public boolean isRevealed(){
         return revealed;
+    }
+
+    public boolean isFlagged(){
+        return isFlagged;
     }
 }

@@ -22,11 +22,18 @@ void draw() {
 }
 
 void mouseReleased(){
-    if(mouseButton == LEFT){
-        int r = (int)(mouseY / wid);
-        int c = (int)(mouseX / wid);
+    int r = (int)(mouseY / wid);
+    int c = (int)(mouseX / wid);
+
+    if(mouseButton == LEFT)
         board.reveal(r, c);
-    }
+    if(mouseButton == RIGHT)
+        board.flag(r, c);
+}
+
+void keyReleased() {
+    if(key == 'r')
+        board = new Board(rows, cols, numBombs);
 }
 
 void drawGrid(){
