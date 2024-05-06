@@ -4,6 +4,8 @@ public class Board{
     int numBombs;
     boolean firstClick = true;
     boolean gameOver = false;
+    PImage mineImg = loadImage("Images/Mine.png");
+    PImage flagImg = loadImage("Images/Flag.png");
 
     color bomb = color(255, 50, 132);
     color hidden = color(50, 132, 255);
@@ -103,7 +105,25 @@ public class Board{
         if(!board[r][c].isBomb() && board[r][c].getNum() == 0)
             revealAdjCells(r, c);
 
-        if(board[r][c].isBomb()) gameOver = true;
+        if(board[r][c].isBomb()){
+            gameOver = true;
+            revealAllBombs();
+        } 
+    }
+
+    void revealAllBombs(){
+        for(int r = 0; r < rows; r++){
+            for(int c = 0; c < cols; c++){
+                if(board[r][c].isBomb()){
+                    fill(bomb);
+                    if(board[r][c].isFlagged())
+                        fill(flagged);
+
+                    rect(c * wid, r * wid, wid, wid);
+                    image(mineImg, c*wid, r*wid, wid, wid);
+                }
+            }
+        }
     }
 
     public void flag(int r, int c){
@@ -140,6 +160,7 @@ public class Board{
                 if(board[r][c].isFlagged()){        // if cell is flagged
                     fill(flagged);
                     rect(c * wid, r * wid, wid, wid);
+                    image(flagImg, c * wid, r * wid, wid, wid);
                 }
                 else if(!board[r][c].isRevealed()){ // if cell is hidden
                     fill(hidden);
@@ -149,6 +170,7 @@ public class Board{
                     if(board[r][c].isBomb()){
                         fill(bomb);
                         rect(c * wid, r * wid, wid, wid);
+                        image(mineImg, c * wid, r * wid, wid, wid);
                     }
                     else if(board[r][c].getNum() == 0){
                         fill(revealed);
