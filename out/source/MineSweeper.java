@@ -38,6 +38,12 @@ public void draw() {
     board.drawBoard();
 }
 
+public void mouseReleased(){
+    int r = (int)(mouseY / wid);
+    int c = (int)(mouseX / wid);
+    board.reveal(r, c);
+}
+
 public void drawGrid(){
     for(int r = 0; r < rows; r++){
         for(int c = 0; c < cols; c++){
@@ -60,9 +66,12 @@ public class Board{
     Cell[][] board;
     int rows, cols;
     int numBombs;
+    boolean firstClick = true;
 
     int bomb = color(255, 50, 132);
-    int nonBomb = color(50, 132, 255);
+    int hidden = color(50, 132, 255);
+    int revealed = color(51, 51, 70);
+    int textCol = color(204);
 
     public Board(int rows, int cols, int numBombs){
         this.rows = rows;
@@ -73,7 +82,9 @@ public class Board{
         for(int r = 0; r < rows; r++)
             for(int c = 0; c < cols; c++)
                 board[r][c] = new Cell();
+
         assignBombs();
+        updateCellNumbers();
     }
 
     public void assignBombs(){
@@ -103,18 +114,65 @@ public class Board{
         }
     }
 
+    public void updateCellNumbers(){
+        for(int r = 0; r < rows; r++){
+            for(int c = 0; c < cols; c++){
+                if(board[r][c].isBomb()) continue;
+
+                int adjBombs = getAdjBombCount(r, c);
+                board[r][c].setNum(adjBombs);
+            }
+        }
+    }
+
+    public int getAdjBombCount(int r, int c){
+        int count = 0;
+        for(int sqrR = r - 1; sqrR <= r + 1; sqrR++){
+            if(sqrR < 0 || sqrR >= rows) continue;
+            for(int sqrC = c - 1; sqrC <= c + 1; sqrC++){
+                if(sqrC < 0 || sqrC >= cols) continue;
+                if(sqrR == r && sqrC == c) continue;
+
+                if(board[sqrR][sqrC].isBomb())
+                    count++;
+            }
+        }
+
+        return count;
+    }
+
+    public void reveal(int r, int c){
+        board[r][c].reveal();
+    }
+
     public void drawBoard(){
         float wid = width / cols;
+        textAlign(CENTER, CENTER);
+        textSize(24);
+        noStroke();
 
         for(int r = 0; r < rows; r++){
             for(int c = 0; c < cols; c++){
-                if(board[r][c].isBomb())
-                    fill(bomb);
-                else
-                    fill(nonBomb);
-
-                noStroke();
-                rect(c * wid, r * wid, wid, wid);
+                if(!board[r][c].isRevealed()){  // if cell is revealed
+                    fill(hidden);
+                    rect(c * wid, r * wid, wid, wid);
+                }
+                else{                           // if cell is hidden
+                    if(board[r][c].isBomb()){
+                        fill(bomb);
+                        rect(c * wid, r * wid, wid, wid);
+                    }
+                    else if(board[r][c].getNum() == 0){
+                        fill(revealed);
+                        rect(c * wid, r * wid, wid, wid);
+                    }
+                    else{
+                        fill(revealed);
+                        rect(c * wid, r * wid, wid, wid);
+                        fill(255);
+                        text(board[r][c].getNum(), c * wid + wid/2, r * wid + wid/2);
+                    }
+                }
             }
         }
     }
@@ -137,6 +195,22 @@ class Cell{
 
     public boolean isBomb(){
         return isBomb;
+    }
+
+    public void setNum(int number){
+        this.number = number;
+    }
+
+    public int getNum(){
+        return number;
+    }
+
+    public void reveal(){
+        revealed = true;
+    }
+
+    public boolean isRevealed(){
+        return revealed;
     }
 }
 

@@ -2,9 +2,12 @@ public class Board{
     Cell[][] board;
     int rows, cols;
     int numBombs;
+    boolean firstClick = true;
 
     color bomb = color(255, 50, 132);
-    color nonBomb = color(50, 132, 255);
+    color hidden = color(50, 132, 255);
+    color revealed = color(51, 51, 70);
+    color textCol = color(204);
 
     public Board(int rows, int cols, int numBombs){
         this.rows = rows;
@@ -15,7 +18,9 @@ public class Board{
         for(int r = 0; r < rows; r++)
             for(int c = 0; c < cols; c++)
                 board[r][c] = new Cell();
+
         assignBombs();
+        updateCellNumbers();
     }
 
     void assignBombs(){
@@ -72,18 +77,38 @@ public class Board{
         return count;
     }
 
+    public void reveal(int r, int c){
+        board[r][c].reveal();
+    }
+
     public void drawBoard(){
         float wid = width / cols;
+        textAlign(CENTER, CENTER);
+        textSize(24);
+        noStroke();
 
         for(int r = 0; r < rows; r++){
             for(int c = 0; c < cols; c++){
-                if(board[r][c].isBomb())
-                    fill(bomb);
-                else
-                    fill(nonBomb);
-
-                noStroke();
-                rect(c * wid, r * wid, wid, wid);
+                if(!board[r][c].isRevealed()){  // if cell is revealed
+                    fill(hidden);
+                    rect(c * wid, r * wid, wid, wid);
+                }
+                else{                           // if cell is hidden
+                    if(board[r][c].isBomb()){
+                        fill(bomb);
+                        rect(c * wid, r * wid, wid, wid);
+                    }
+                    else if(board[r][c].getNum() == 0){
+                        fill(revealed);
+                        rect(c * wid, r * wid, wid, wid);
+                    }
+                    else{
+                        fill(revealed);
+                        rect(c * wid, r * wid, wid, wid);
+                        fill(255);
+                        text(board[r][c].getNum(), c * wid + wid/2, r * wid + wid/2);
+                    }
+                }
             }
         }
     }
@@ -106,5 +131,21 @@ class Cell{
 
     public boolean isBomb(){
         return isBomb;
+    }
+
+    public void setNum(int number){
+        this.number = number;
+    }
+
+    public int getNum(){
+        return number;
+    }
+
+    public void reveal(){
+        revealed = true;
+    }
+
+    public boolean isRevealed(){
+        return revealed;
     }
 }

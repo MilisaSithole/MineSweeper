@@ -21,6 +21,14 @@ void draw() {
     board.drawBoard();
 }
 
+void mouseReleased(){
+    if(mouseButton == LEFT){
+        int r = (int)(mouseY / wid);
+        int c = (int)(mouseX / wid);
+        board.reveal(r, c);
+    }
+}
+
 void drawGrid(){
     for(int r = 0; r < rows; r++){
         for(int c = 0; c < cols; c++){
