@@ -1,0 +1,50 @@
+public class Board{
+    Cell[][] board;
+    int rows, cols;
+    int numBombs;
+
+    public Board(int rows, int cols, int numBombs){
+        this.rows = rows;
+        this.cols = cols;
+        this.numBombs = numBombs;
+
+        board = new Cell[rows][cols];
+        assignBombs();
+    }
+
+    void assignBombs(){
+        int[] chosenIndexes = new int[numBombs];
+        
+        int count = 0;
+        while(count < numBombs){
+            int num = (int)random(numBombs);
+            boolean found = false;
+            for(int i = 0; i < chosenIndexes.length; i++)
+                if(chosenIndexes[i] == num){
+                    found = true;
+                    break;
+                }
+
+            if(found) continue;
+            else{
+                chosenIndexes[count] = num;
+                count++;
+            }
+        }
+
+        for(int idx: chosenIndexes)
+            println(idx);
+    }
+}
+
+class Cell{
+    boolean isBomb;
+    int number;
+    boolean isFlagged = false;
+    boolean revealed = false;
+
+    public Cell(){
+        isBomb = false;
+        number = 0;
+    }
+}
