@@ -1,7 +1,7 @@
 public class Board{
     Cell[][] board;
     int rows, cols;
-    int numBombs;
+    int numBombs, flags;
     boolean firstClick = true;
     boolean gameOver = false;
     PImage mineImg = loadImage("Images/Mine.png");
@@ -10,8 +10,8 @@ public class Board{
     color bomb = color(255, 50, 132);
     color hidden = color(50, 132, 255);
     color revealed = color(51, 51, 70);
-    color flagged = color(128);
-    color textCol = color(204);
+    color flagged = color(128, 128, 155);
+    color textCol = color(204, 204, 255);
 
     public Board(int rows, int cols, int numBombs){
         this.rows = rows;
@@ -24,6 +24,7 @@ public class Board{
     }
 
     void initBoard(){
+        surface.setTitle("Minesweeper || " + (numBombs - flags) + " bombs left");
         for(int r = 0; r < rows; r++)
             for(int c = 0; c < cols; c++)
                 board[r][c] = new Cell();
@@ -32,6 +33,7 @@ public class Board{
         updateCellNumbers();
         gameOver = false;
         firstClick = true;
+        flags = 0;
     }
 
     void assignBombs(){
@@ -89,8 +91,11 @@ public class Board{
     }
 
     public void reveal(int r, int c){
+        if(board[r][c].isFlagged()) return;
+        
         if(gameOver){
             initBoard();
+            loop();
             return;
         }
 
@@ -108,6 +113,7 @@ public class Board{
         if(board[r][c].isBomb()){
             gameOver = true;
             revealAllBombs();
+            noLoop();
         } 
     }
 
@@ -128,7 +134,10 @@ public class Board{
 
     public void flag(int r, int c){
         if(board[r][c].isRevealed()) return;
+
         board[r][c].flag();
+        if(board[r][c].isFlagged()) flags++;
+        else flags--;
     }
 
     void revealAdjCells(int r, int c){
@@ -154,6 +163,8 @@ public class Board{
         textAlign(CENTER, CENTER);
         textSize(24);
         noStroke();
+
+        surface.setTitle("Minesweeper || " + (numBombs - flags) + " bombs left");
 
         for(int r = 0; r < rows; r++){
             for(int c = 0; c < cols; c++){
