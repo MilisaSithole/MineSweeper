@@ -2,8 +2,9 @@ public class Board{
     Cell[][] board;
     int rows, cols;
     int numBombs, flags;
+    int availMoves;
+    int gameOver = 0; // -1 lost, 0 playing, 1 won
     boolean firstClick = true;
-    boolean gameOver = false;
     PImage mineImg = loadImage("Images/Mine.png");
     PImage flagImg = loadImage("Images/Flag.png");
 
@@ -11,6 +12,7 @@ public class Board{
     color hidden = color(50, 132, 255);
     color revealed = color(51, 51, 70);
     color flagged = color(128, 128, 155);
+    color won = color(50, 255, 132);
     color textCol = color(204, 204, 255);
 
     public Board(int rows, int cols, int numBombs){
@@ -31,7 +33,7 @@ public class Board{
 
         assignBombs();
         updateCellNumbers();
-        gameOver = false;
+        gameOver = 0;
         firstClick = true;
         flags = 0;
     }
@@ -92,8 +94,8 @@ public class Board{
 
     public void reveal(int r, int c){
         if(board[r][c].isFlagged()) return;
-        
-        if(gameOver){
+
+        if(gameOver != 0){
             initBoard();
             loop();
             return;
@@ -111,13 +113,21 @@ public class Board{
             revealAdjCells(r, c);
 
         if(board[r][c].isBomb()){
-            gameOver = true;
-            revealAllBombs();
+            gameOver = -1;
+            revealAllBombsLost();
             noLoop();
         } 
+
+        availMoves = countAvailMoves();
+        if(checkWinState()){
+            drawBoard();
+            gameOver = 1;
+            revealAllBombsWon();
+            noLoop();
+        }
     }
 
-    void revealAllBombs(){
+    void revealAllBombsLost(){
         for(int r = 0; r < rows; r++){
             for(int c = 0; c < cols; c++){
                 if(board[r][c].isBomb()){
@@ -125,6 +135,18 @@ public class Board{
                     if(board[r][c].isFlagged())
                         fill(flagged);
 
+                    rect(c * wid, r * wid, wid, wid);
+                    image(mineImg, c*wid, r*wid, wid, wid);
+                }
+            }
+        }
+    }
+
+    void revealAllBombsWon(){
+        for(int r = 0; r < rows; r++){
+            for(int c = 0; c < cols; c++){
+                if(board[r][c].isBomb()){
+                    fill(won);
                     rect(c * wid, r * wid, wid, wid);
                     image(mineImg, c*wid, r*wid, wid, wid);
                 }
@@ -156,6 +178,24 @@ public class Board{
                     revealAdjCells(sqrR, sqrC);
             }
         }
+    }
+
+    int countAvailMoves(){
+        int count = 0;
+        for(int r = 0; r < rows; r++)
+            for(int c = 0; c < cols; c++)
+                if(!board[r][c].isRevealed())
+                    count++;
+
+        return count;
+    }
+
+    boolean checkWinState(){
+        if(availMoves == numBombs){
+            gameOver = 1;
+            return true;
+        } 
+        return false;
     }
 
     public void drawBoard(){
