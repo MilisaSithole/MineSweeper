@@ -4,7 +4,9 @@ public class Board{
     int numBombs, flags;
     int availMoves;
     int gameOver = 0; // -1 lost, 0 playing, 1 won
+    int startTime;
     boolean firstClick = true;
+    boolean timerOn = false;
     PImage mineImg = loadImage("Images/Mine.png");
     PImage flagImg = loadImage("Images/Flag.png");
 
@@ -26,7 +28,6 @@ public class Board{
     }
 
     void initBoard(){
-        surface.setTitle("Minesweeper || " + (numBombs - flags) + " bombs left");
         for(int r = 0; r < rows; r++)
             for(int c = 0; c < cols; c++)
                 board[r][c] = new Cell();
@@ -36,6 +37,7 @@ public class Board{
         gameOver = 0;
         firstClick = true;
         flags = 0;
+        timerOn = false;
     }
 
     void assignBombs(){
@@ -95,7 +97,7 @@ public class Board{
     public void reveal(int r, int c){
         if(board[r][c].isFlagged()) return;
 
-        if(gameOver != 0){
+        if(gameOver != 0){ // If game already over
             initBoard();
             loop();
             return;
@@ -108,6 +110,8 @@ public class Board{
         firstClick = false;
 
         board[r][c].reveal();
+        startTime = millis();
+        timerOn = true;
 
         if(!board[r][c].isBomb() && board[r][c].getNum() == 0)
             revealAdjCells(r, c);
@@ -198,13 +202,25 @@ public class Board{
         return false;
     }
 
+    String getFormattedTime() {
+        int elapsedTime = (millis() - startTime) / 1000; // Calculate elapsed time in seconds
+        int minutes = elapsedTime / 60; 
+        int seconds = elapsedTime % 60; 
+
+        // Format the time as MM:SS
+        return String.format("%02d:%02d", minutes, seconds);
+    }
+
     public void drawBoard(){
         float wid = width / cols;
         textAlign(CENTER, CENTER);
         textSize(24);
         noStroke();
 
-        surface.setTitle("Minesweeper || " + (numBombs - flags) + " bombs left");
+        if(timerOn)
+            surface.setTitle("Minesweeper || " + (numBombs - flags) + " bombs left || Time: " + getFormattedTime());
+        else
+            surface.setTitle("Minesweeper || " + (numBombs - flags) + " bombs left");
 
         for(int r = 0; r < rows; r++){
             for(int c = 0; c < cols; c++){
