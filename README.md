@@ -2,6 +2,10 @@
 
 Hello, welcome to my Minesweeper game! This game was developed by me as a fun project to recreate the classic Minesweeper game that many of us enjoyed in our childhood.
 
+## Running the Game
+
+This game is developed in Processing. To run the game, you need to have Processing installed on your computer. You can [download](https://processing.org/download) Processing from their official website.
+
 ## Future Plans
 
 In the future, I plan to develop an AI that can play this game. The goal is to create an intelligent agent that can navigate through the minefield with the highest possible success rate. Stay tuned for updates on this exciting addition!
