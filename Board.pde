@@ -93,6 +93,8 @@ public class Board{
         }
         firstClick = false;
 
+        if(board[r][c].isRevealed()) 
+            autoReveal(r, c);
         board[r][c].reveal();
         if(!timerOn) {
             startTime = millis();
@@ -102,7 +104,7 @@ public class Board{
         if(!board[r][c].isBomb() && board[r][c].getNum() == 0)
             revealAdjCells(r, c);
 
-        if(board[r][c].isBomb()){
+        if(board[r][c].isBomb() || gameOver == -1){
             gameOver = -1;
             revealAllBombs(bomb);
             noLoop();
@@ -113,6 +115,14 @@ public class Board{
             gameOver = 1;
             revealAllBombs(won);
             noLoop();
+        }
+    }
+
+    void autoReveal(int r, int c){
+        int cellNum = board[r][c].getNum();
+        if(cellNum > 0){
+            if(countAdjFlags(r, c) == cellNum)
+                revealAdjCells(r, c);
         }
     }
 
@@ -150,6 +160,8 @@ public class Board{
                 if(board[sqrR][sqrC].isRevealed()) continue;
                 
                 board[sqrR][sqrC].reveal();
+                if(board[sqrR][sqrC].isBomb())
+                    gameOver = -1;
 
                 if(!board[sqrR][sqrC].isBomb() && !board[r][c].isFlagged() && board[sqrR][sqrC].getNum() == 0)
                     revealAdjCells(sqrR, sqrC);
@@ -163,6 +175,21 @@ public class Board{
             for(int c = 0; c < cols; c++)
                 if(!board[r][c].isRevealed())
                     count++;
+
+        return count;
+    }
+
+    int countAdjFlags(int r, int c){
+        int count = 0;
+        for(int sqrR = r - 1; sqrR <= r + 1; sqrR++){
+            if(sqrR < 0 || sqrR >= rows) continue;
+            for(int sqrC = c - 1; sqrC <= c + 1; sqrC++){
+                if(sqrC < 0 || sqrC >= cols) continue;
+                if(sqrR == r && sqrC == c) continue;
+                if(board[sqrR][sqrC].isFlagged())
+                    count++;
+            }
+        }
 
         return count;
     }
