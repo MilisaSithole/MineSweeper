@@ -21,7 +21,6 @@ public class Board{
         this.rows = rows;
         this.cols = cols;
         this.numBombs = numBombs;
-        firstClick = true;
 
         board = new Cell[rows][cols];
         initBoard();
@@ -41,29 +40,14 @@ public class Board{
     }
 
     void assignBombs(){
-        int[] chosenIndexes = new int[numBombs];
         int count = 0;
-
         while(count < numBombs){
             int num = (int)random(rows * cols);
-            boolean found = false;
-            for(int i = 0; i < chosenIndexes.length; i++)
-                if(chosenIndexes[i] == num){
-                    found = true;
-                    break;
-                }
 
-            if(found) continue;
-            else{
-                chosenIndexes[count] = num;
+            if(!board[num / cols][num % cols].isBomb()){
+                board[num / cols][num % cols].setBomb();
                 count++;
             }
-        }
-
-        for(int idx: chosenIndexes){
-            int r = idx / cols;
-            int c = idx % cols;
-            board[r][c].setBomb();
         }
     }
 
@@ -110,47 +94,36 @@ public class Board{
         firstClick = false;
 
         board[r][c].reveal();
-        startTime = millis();
-        timerOn = true;
+        if(!timerOn) {
+            startTime = millis();
+            timerOn = true;
+        }
 
         if(!board[r][c].isBomb() && board[r][c].getNum() == 0)
             revealAdjCells(r, c);
 
         if(board[r][c].isBomb()){
             gameOver = -1;
-            revealAllBombsLost();
+            revealAllBombs(bomb);
             noLoop();
         } 
 
-        availMoves = countAvailMoves();
         if(checkWinState()){
             drawBoard();
             gameOver = 1;
-            revealAllBombsWon();
+            revealAllBombs(won);
             noLoop();
         }
     }
 
-    void revealAllBombsLost(){
+    void revealAllBombs(color col){
         for(int r = 0; r < rows; r++){
             for(int c = 0; c < cols; c++){
                 if(board[r][c].isBomb()){
-                    fill(bomb);
-                    if(board[r][c].isFlagged())
+                    fill(col);
+                    if(col == bomb && board[r][c].isFlagged())
                         fill(flagged);
 
-                    rect(c * wid, r * wid, wid, wid);
-                    image(mineImg, c*wid, r*wid, wid, wid);
-                }
-            }
-        }
-    }
-
-    void revealAllBombsWon(){
-        for(int r = 0; r < rows; r++){
-            for(int c = 0; c < cols; c++){
-                if(board[r][c].isBomb()){
-                    fill(won);
                     rect(c * wid, r * wid, wid, wid);
                     image(mineImg, c*wid, r*wid, wid, wid);
                 }
@@ -195,6 +168,7 @@ public class Board{
     }
 
     boolean checkWinState(){
+        availMoves = countAvailMoves();
         if(availMoves == numBombs){
             gameOver = 1;
             return true;
